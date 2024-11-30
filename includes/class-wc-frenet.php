@@ -4,6 +4,20 @@
  */
 class WC_Frenet extends WC_Shipping_Method {
 
+    // Declare todas as propriedades necessárias
+    private $webservice;
+    private $zip_origin;
+    private $minimum_height;
+    private $minimum_width;
+    private $minimum_length;
+    private $debug;
+    private $display_date;
+    private $login;
+    private $password;
+    private $additional_time;
+    private $token;
+    private $log;
+
     public $quoteByProduct = false;
 
     /**
@@ -11,72 +25,73 @@ class WC_Frenet extends WC_Shipping_Method {
      */
     protected $urlShipQuote = 'http://api.frenet.com.br/shipping/quote';
 
-	/**
-	 * Initialize the Frenet shipping method.
-	 *
-	 * @return void
-	 */
-	public function __construct($instance_id = 0 ) {
+    /**
+     * Initialize the Frenet shipping method.
+     *
+     * @param int $instance_id
+     * @return void
+     */
+    public function __construct($instance_id = 0) {
         $this->id           = 'frenet';
-        $this->instance_id 	= absint( $instance_id );
-		$this->method_title = __( 'Frenet', 'woo-shipping-gateway' );
+        $this->instance_id  = absint($instance_id);
+        $this->method_title = __('Frenet', 'woo-shipping-gateway');
 
-        $this->supports              = array(
+        $this->supports = array(
             'shipping-zones',
-            'instance-settings'
+            'instance-settings',
         );
 
-		$this->init();
-	}
+        $this->init();
+    }
 
-	/**
-	 * Convert class to string.
-	 *
-	 * @return string Class ID.
-	 */
-	public function __toString()
-	{
-	    return 'WC_Frenet::' . $this->id . '::' . $this->instance_id . '::' . $this->method_title;
-	}
+    /**
+     * Convert class to string.
+     *
+     * @return string Class ID.
+     */
+    public function __toString() {
+        return 'WC_Frenet::' . $this->id . '::' . $this->instance_id . '::' . $this->method_title;
+    }
 
-	/**
-	 * Initializes the method.
-	 *
-	 * @return void
-	 */
-	public function init() {
-		// Frenet Web Service.
-		$this->webservice = 'http://services.frenet.com.br/logistics/ShippingQuoteWS.asmx?wsdl';
+    /**
+     * Initializes the method.
+     *
+     * @return void
+     */
+    public function init() {
+        // Frenet Web Service.
+        $this->webservice = 'http://services.frenet.com.br/logistics/ShippingQuoteWS.asmx?wsdl';
 
-		// Load the form fields.
-		$this->init_form_fields();
+        // Load the form fields.
+        $this->init_form_fields();
 
-		// Load the settings.
-		$this->init_settings();
+        // Load the settings.
+        $this->init_settings();
 
-		// Define user set variables.
-		$this->enabled            = $this->get_option('enabled');
-		$this->title              = $this->get_option('title');
-		$this->zip_origin         = $this->get_option('zip_origin');
-		$this->minimum_height     = $this->get_option('minimum_height');
-		$this->minimum_width      = $this->get_option('minimum_width');
-		$this->minimum_length     = $this->get_option('minimum_length');
-		$this->debug              = $this->get_option('debug');
+        // Define user set variables.
+        $this->enabled            = $this->get_option('enabled');
+        $this->title              = $this->get_option('title');
+        $this->zip_origin         = $this->get_option('zip_origin');
+        $this->minimum_height     = $this->get_option('minimum_height');
+        $this->minimum_width      = $this->get_option('minimum_width');
+        $this->minimum_length     = $this->get_option('minimum_length');
+        $this->debug              = $this->get_option('debug');
         $this->display_date       = $this->get_option('display_date');
         $this->login              = $this->get_option('login');
         $this->password           = $this->get_option('password');
         $this->additional_time    = $this->get_option('additional_time');
-        $this->debug              = $this->get_option( 'debug' );
         $this->token              = $this->get_option('token');
 
-		// Active logs.
-		if ( 'yes' == $this->debug ) {
-			if ( class_exists( 'WC_Logger' ) ) {
-				$this->log = new WC_Logger();
-			} else {
-				$this->log = $this->woocommerce_method()->logger();
-			}
-		}
+        // Active logs.
+        if ('yes' === $this->debug) {
+            if (class_exists('WC_Logger')) {
+                $this->log = new WC_Logger();
+            } else {
+                $this->log = $this->woocommerce_method()->logger();
+            }
+        }
+
+
 
 		// Actions.
         add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
