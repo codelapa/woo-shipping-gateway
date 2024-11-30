@@ -8,29 +8,41 @@ $product_shipping_class = false;
 $shipping_classes = WC()->shipping->get_shipping_classes();
 $helper = new WC_Frenet_Helper();
 
-foreach (WC()->shipping->get_shipping_classes() as $class) {
-    if ($class->slug === $product->get_shipping_class()) {
-        $product_shipping_class = $class;
-    }
+// Certifique-se de que $product esteja definido e seja um objeto de produto válido
+if (isset($product) && is_object($product) && method_exists($product, 'get_shipping_class')) {
+    foreach ($shipping_classes as $class) {
+        if ($class->slug === $product->get_shipping_class()) {
+            $product_shipping_class = $class;
+        }
 
-    if ($product->get_shipping_class() === '') {
-        $product_shipping_class = new stdClass();
-        $product_shipping_class->term_id = 0;
+        if ($product->get_shipping_class() === '') {
+            $product_shipping_class = new stdClass();
+            $product_shipping_class->term_id = 0;
+        }
     }
+}
+
+// Verifique se $product_shipping_class é válido antes de acessar propriedades
+if (!is_object($product_shipping_class) || !isset($product_shipping_class->term_id)) {
+    $product_shipping_class = new stdClass();
+    $product_shipping_class->term_id = 0;
 }
 
 foreach ($helper->get_instance_ids() as $object) {
     $frenet = new WC_Frenet($object->instance_id);
     $instance_id = $object->instance_id;
     $class_id = $product_shipping_class->term_id;
-    $frenet_class_id = $frenet->get_option('shipping_class_id') ? (int)$frenet->get_option('shipping_class_id') : -1;
+    $frenet_class_id = $frenet->get_option('shipping_class_id') ? (int) $frenet->get_option('shipping_class_id') : -1;
 
-    if ($class_id === $frenet_class_id || (int)$frenet_class_id === -1) {
+    if ($class_id === $frenet_class_id || (int) $frenet_class_id === -1) {
         $has_shipping_class = true;
     }
 }
 
-if (!$has_shipping_class) return;
+if (!$has_shipping_class) {
+    return;
+}
+
 
 ?>
 
